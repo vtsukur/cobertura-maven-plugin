@@ -27,6 +27,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.mojo.cobertura.configuration.ConfigInstrumentation;
 import org.codehaus.mojo.cobertura.module.DependenciesModuleManager;
 import org.codehaus.mojo.cobertura.tasks.InstrumentTask;
+import org.codehaus.mojo.cobertura.util.DependenciesMatchingUtil;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -61,11 +62,25 @@ public class CoberturaInstrumentMojo
     public void execute()
             throws MojoExecutionException
     {
+        // ensure that instrumentation config is set here, not via maven plugin api @required attribute, as this is
+        // not a required object from the pom configuration's point of view.
+        if (instrumentation == null)
+        {
+            instrumentation = new ConfigInstrumentation();
+        }
+
         ArtifactHandler artifactHandler = project.getArtifact().getArtifactHandler();
         if (!"java".equals(artifactHandler.getLanguage()))
         {
             getLog().info(
                     "Not executing cobertura:instrument as the project is not a Java classpath-capable package");
+        }
+        // If current project matches one of excludeArtifactId then instrumentation should be skipped.
+        else if (DependenciesMatchingUtil.matchListRegex(
+                instrumentation.getExcludesArtifactId(), project.getArtifactId()))
+        {
+            getLog().info(
+                    "Not executing cobertura:instrument as the project artifact matches excludeArtifactId");
         }
         else
         {
@@ -74,13 +89,6 @@ public class CoberturaInstrumentMojo
             if (!instrumentedDirectory.exists())
             {
                 instrumentedDirectory.mkdirs();
-            }
-
-            // ensure that instrumentation config is set here, not via maven plugin api @required attribute, as this is
-            // not a required object from the pom configuration's point of view.
-            if (instrumentation == null)
-            {
-                instrumentation = new ConfigInstrumentation();
             }
 
             /* ensure that the default includes is set */
