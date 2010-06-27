@@ -6,6 +6,7 @@ import net.sourceforge.cobertura.coveragedata.ProjectData;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.cobertura.util.DependenciesMatchingUtil;
 import org.codehaus.mojo.cobertura.util.JavaFileUtil;
 
 import java.io.File;
@@ -144,6 +145,15 @@ public class CoberturaConsolidateMojo
         ArrayList<File> listSerFiles = new ArrayList<File>();
         for (MavenProject reactorProject : mavenProjectList)
         {
+            if (shouldBeSkippedAsExcludedFromInstrumentation(reactorProject))
+            {
+                String referenceId = reactorProject.getGroupId() + ":" + reactorProject.getArtifactId() + ":" +
+                        reactorProject.getVersion();
+                getLog().info("Ignoring consolidation of [" + referenceId + "]" +
+                        " (excludesArtifactId match)");
+                continue;
+            }
+
             File fileForProject = getSerFileForProject(reactorProject);
             if (fileForProject.exists())
             {
@@ -152,6 +162,20 @@ public class CoberturaConsolidateMojo
             }
         }
         return listSerFiles;
+    }
+
+    /**
+     * Determines whether given project (child module) should be skipped because
+     * instrumentation <code>excludeArtifactId</code> pattern is set.
+     *
+     * @param mavenProject a maven project.
+     *
+     * @return <code>true</code> if given project should be skipped; <code>false</code> otherwise. 
+     */
+    private boolean shouldBeSkippedAsExcludedFromInstrumentation(MavenProject mavenProject)
+    {
+        return instrumentation != null && DependenciesMatchingUtil.matchListRegex(
+                instrumentation.getExcludesArtifactId(), mavenProject.getArtifactId());
     }
 
     /**
@@ -178,6 +202,12 @@ public class CoberturaConsolidateMojo
     {
         for (MavenProject project : projectList)
         {
+            if (instrumentation != null && shouldBeSkippedAsExcludedFromInstrumentation(project))
+            {
+                getLog().info("Skipping consolidation for project " + project.getName() +
+                        " (excludesArtifactId match)");
+                continue;
+            }
             File consolidateDataFile = getConsolidatedFile(project);
             consolidateDataFile.delete();
             getLog().info("Consolidate project " + project.getName());
@@ -207,7 +237,12 @@ public class CoberturaConsolidateMojo
         for (String className : classListName)
         {
             final ClassData classData = globalSer.getClassData(className);
-            resultProjectData.addClassData(classData);
+            if (classData == null) {
+                getLog().warn("No class data found for [" + className + "]");                
+            }
+            else {
+                resultProjectData.addClassData(classData);
+            }
         }
         return resultProjectData;
     }
