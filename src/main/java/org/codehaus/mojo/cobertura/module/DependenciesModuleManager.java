@@ -1,13 +1,11 @@
 package org.codehaus.mojo.cobertura.module;
 
-import net.sourceforge.cobertura.util.RegexUtil;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.cobertura.configuration.ConfigInstrumentation;
 import org.codehaus.mojo.cobertura.util.ZipUtil;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
