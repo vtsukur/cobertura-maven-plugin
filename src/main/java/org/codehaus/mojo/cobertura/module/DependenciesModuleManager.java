@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.codehaus.mojo.cobertura.util.DependenciesMatchingUtil.matchListRegex;
+
 /**
  * Allow to unpack dependencies of a maven project in the outputDir.
  * Dependencies to include/exclude are specified in the instrumentation configuration
@@ -65,16 +67,4 @@ public class DependenciesModuleManager
         }
     }
 
-    public boolean matchListRegex(List listStringPattern, String toMatch)
-    {
-        final HashSet setPattern = new HashSet();
-        for (Object regexp : listStringPattern)
-        {
-            RegexUtil.addRegex(setPattern, (String) regexp);
-        }
-        return RegexUtil.matches(setPattern, toMatch);
-    }
-
-
 }
-

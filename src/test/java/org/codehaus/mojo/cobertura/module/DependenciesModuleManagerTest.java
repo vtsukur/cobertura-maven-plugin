@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.codehaus.mojo.cobertura.util.DependenciesMatchingUtil.matchListRegex;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -19,21 +20,21 @@ public class DependenciesModuleManagerTest
     public void testMatchListRegex() throws Exception
     {
         final List<String> stringList = Arrays.asList("com.group");
-        assertThat(moduleManager.matchListRegex(stringList, "com.group"), Is.is(true));
+        assertThat(matchListRegex(stringList, "com.group"), Is.is(true));
     }
 
     @Test
     public void testMatchListRegexWithStar() throws Exception
     {
         final List<String> stringList = Arrays.asList("com.*");
-        assertThat(moduleManager.matchListRegex(stringList, "com.group"), Is.is(true));
+        assertThat(matchListRegex(stringList, "com.group"), Is.is(true));
     }
 
     @Test
     public void anotherTestMatchListRegex() throws Exception
     {
         final List<String> stringList = Arrays.asList("test-multi-module");
-        assertThat(moduleManager.matchListRegex(stringList, "test-multi-module"), Is.is(true));
+        assertThat(matchListRegex(stringList, "test-multi-module"), Is.is(true));
     }
 
 }
