@@ -29,10 +29,7 @@ import org.codehaus.doxia.sink.Sink;
 import org.codehaus.mojo.cobertura.tasks.ReportTask;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Generates a Cobertura Report.
@@ -244,7 +241,22 @@ public class CoberturaReportMojo
 
             File moduleReportOutputDirectory = new File(reactorProject.getReporting().getOutputDirectory(), "cobertura");
             task.setOutputDirectory(moduleReportOutputDirectory);
-            task.setCompileSourceRoots(reactorProject.getCompileSourceRoots());
+
+            List sourceRoots = new ArrayList();
+            if ("pom".equals(reactorProject.getPackaging())) {
+                // Report for the root project is the consolidated code coverage report,
+                // so all source paths for all reactor projects should be collected.
+                // This will ensure that code complexity and detailed overview of coverage
+                // will be available in generated report for all sources of the multi-module project.
+                for (MavenProject module : reactorProjects) {
+                    sourceRoots.addAll(module.getCompileSourceRoots());
+                }
+            }
+            else {
+                sourceRoots = reactorProject.getCompileSourceRoots();
+            }
+
+            task.setCompileSourceRoots(sourceRoots);
             task.setSourceEncoding(encoding);
 
             if (format != null)
