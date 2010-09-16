@@ -30,7 +30,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.5-SNAPSHOT</version>
+                <version>2.5-Jaspersoft</version>
                 <configuration>
                     <useConsolidated>true</useConsolidated>
                     <instrumentation>
